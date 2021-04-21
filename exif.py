@@ -15,7 +15,7 @@
 #
 
 from PIL import Image
-from PIL.ExifTags import TAGS
+from PIL.ExifTags import GPSTAGS, TAGS
 
 import gi
 
@@ -28,6 +28,10 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
     def __init__(self):
         pass
 
+    def get_gps_tags(self, exif):
+        # TODO
+        return exif
+
     def get_human_readable_exif(self, filename):
         exif = {}
 
@@ -37,11 +41,14 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
 
                 for (k, v) in img.getexif().items():
                     if isinstance(v, (bytes, str)) and len(v) > 128:
-                        v = v[:129] + ("..." if isinstance(v, str) else b'...')
+                        v = v[:129] + ("..." if isinstance(v, str) else b"...")
 
                     exif[TAGS.get(k, f"{k} (Unknown)")] = v
         except Exception:
             pass
+
+        if "GPSInfo" in exif:
+            exif = self.get_gps_tags(exif)
 
         return exif
 
