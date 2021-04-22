@@ -31,7 +31,10 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
         pass
 
     def get_gps_tags(self, exif):
-        # TODO
+        gps_info = exif.pop("GPSInfo")
+        for (k, v) in gps_info.items():
+            exif[GPSTAGS.get(k, f"{k} (GPS Tag ID Unknown)")] = v
+
         return exif
 
     def get_human_readable_exif(self, filename):
@@ -45,7 +48,7 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
                     if isinstance(v, (bytes, str)) and len(v) > 64:
                         v = v[:65] + ("..." if isinstance(v, str) else b"...")
 
-                    exif[TAGS.get(k, f"{k} (Unknown)")] = v
+                    exif[TAGS.get(k, f"{k} (Tag ID Unknown)")] = v
         except Exception:
             pass
 
@@ -76,13 +79,13 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
 
         column = Gtk.TreeViewColumn.new()
 
-        renderer = Gtk.CellRendererText.new()
-        column.pack_start(renderer, True)
-        column.add_attribute(renderer, "text", 0)
+        tag_name = Gtk.CellRendererText.new()
+        column.pack_start(tag_name, True)
+        column.add_attribute(tag_name, "text", 0)
 
-        renderer = Gtk.CellRendererText.new()
-        column.pack_start(renderer, True)
-        column.add_attribute(renderer, "text", 1)
+        value = Gtk.CellRendererText.new()
+        column.pack_start(value, True)
+        column.add_attribute(value, "text", 1)
 
         tree_view = Gtk.TreeView.new_with_model(store)
         tree_view.set_headers_visible(False)
