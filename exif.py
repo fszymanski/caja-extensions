@@ -14,6 +14,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 #
 
+# https://developer.here.com/blog/getting-started-with-geocoding-exif-image-metadata-in-python3
+
 from PIL import Image
 from PIL.ExifTags import GPSTAGS, TAGS
 
@@ -40,8 +42,8 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
                 img.verify()
 
                 for (k, v) in img.getexif().items():
-                    if isinstance(v, (bytes, str)) and len(v) > 128:
-                        v = v[:129] + ("..." if isinstance(v, str) else b"...")
+                    if isinstance(v, (bytes, str)) and len(v) > 64:
+                        v = v[:65] + ("..." if isinstance(v, str) else b"...")
 
                     exif[TAGS.get(k, f"{k} (Unknown)")] = v
         except Exception:
@@ -68,17 +70,27 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
         label = Gtk.Label.new("Exif")
         label.show()
 
-        text_view = Gtk.TextView.new()
-        text_view.set_cursor_visible(False)
-        text_view.set_editable(False)
-        text_view.set_wrap_mode(Gtk.WrapMode.CHAR)
-        text_view.show()
+        store = Gtk.ListStore.new([str, str])
+        for (k, v) in exif.items():
+            store.append([str(k), str(v)])
 
-        buf = text_view.get_buffer()
-        buf.set_text("\n".join([f"{k}: {v}" for k, v in exif.items()]))
+        column = Gtk.TreeViewColumn.new()
+
+        renderer = Gtk.CellRendererText.new()
+        column.pack_start(renderer, True)
+        column.add_attribute(renderer, "text", 0)
+
+        renderer = Gtk.CellRendererText.new()
+        column.pack_start(renderer, True)
+        column.add_attribute(renderer, "text", 1)
+
+        tree_view = Gtk.TreeView.new_with_model(store)
+        tree_view.set_headers_visible(False)
+        tree_view.append_column(column)
+        tree_view.show()
 
         scroller = Gtk.ScrolledWindow.new(None, None)
-        scroller.add(text_view)
+        scroller.add(tree_view)
         scroller.show()
 
         return (Caja.PropertyPage(name="CajaPython::exif",
