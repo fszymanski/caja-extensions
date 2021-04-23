@@ -42,7 +42,6 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
 
     def get_human_readable_exif(self, filename):
         exif = {}
-
         try:
             with Image.open(filename) as img:
                 img.verify()
