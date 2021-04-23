@@ -14,51 +14,35 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 #
 
-# https://developer.here.com/blog/getting-started-with-geocoding-exif-image-metadata-in-python3
-
-from PIL import Image
-from PIL.ExifTags import GPSTAGS, TAGS
-
 import gi
 
 gi.require_version("Caja", "2.0")
+gi.require_version('GExiv2', "0.10")
 gi.require_version("Gtk", "3.0")
 
-from gi.repository import Caja, GObject, Gtk
+from gi.repository import Caja, GExiv2, GLib, GObject, Gtk
 
 
 class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
     def __init__(self):
         pass
 
-    def get_gps_tags(self, exif):
-        gps_info = exif.pop("GPSInfo")
+    def get_metadata(self, filename):
+        res = {}
+
+        metadata = GExiv2.Metadata.new()
         try:
-            for (k, v) in gps_info.items():
-                exif[GPSTAGS.get(k, f"{k} (GPS Tag ID Unknown)")] = v
-        except AttributeError:
+            metadata.open_path(filename)
+        except GLib.Error:
             pass
+        else:
+            if metadata.has_exif():
+                for tag in metadata.get_exif_tags():
+                    value = metadata.get_tag_interpreted_string(tag)
+                    if value is not None:
+                        res[tag.split(".")[-1]] = (f"{value[:65]}..." if len(value) > 64 else value)
 
-        return exif
-
-    def get_human_readable_exif(self, filename):
-        exif = {}
-        try:
-            with Image.open(filename) as img:
-                img.verify()
-
-                for (k, v) in img.getexif().items():
-                    if isinstance(v, (bytes, str)) and len(v) > 64:
-                        v = v[:65] + ("..." if isinstance(v, str) else b"...")
-
-                    exif[TAGS.get(k, f"{k} (Tag ID Unknown)")] = v
-        except Exception:
-            pass
-
-        if "GPSInfo" in exif:
-            exif = self.get_gps_tags(exif)
-
-        return exif
+        return res
 
     def get_property_pages(self, files):
         if len(files) != 1:
@@ -69,16 +53,16 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
             return
 
         filename = file.get_location().get_path()
-        exif = self.get_human_readable_exif(filename)
-        if not exif:
+        metadata = self.get_metadata(filename)
+        if not metadata:
             return
 
         label = Gtk.Label.new("Exif")
         label.show()
 
         store = Gtk.ListStore.new([str, str])
-        for (k, v) in exif.items():
-            store.append([str(k), str(v)])
+        for (k, v) in sorted(metadata.items()):
+            store.append([k, v])
 
         tree_view = Gtk.TreeView.new_with_model(store)
         tree_view.show()
