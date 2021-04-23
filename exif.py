@@ -32,8 +32,11 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
 
     def get_gps_tags(self, exif):
         gps_info = exif.pop("GPSInfo")
-        for (k, v) in gps_info.items():
-            exif[GPSTAGS.get(k, f"{k} (GPS Tag ID Unknown)")] = v
+        try:
+            for (k, v) in gps_info.items():
+                exif[GPSTAGS.get(k, f"{k} (GPS Tag ID Unknown)")] = v
+        except AttributeError:
+            pass
 
         return exif
 
@@ -52,7 +55,7 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
         except Exception:
             pass
 
-        if "GPSInfo" in exif and isinstance(exif["GPSInfo"], dict):
+        if "GPSInfo" in exif:
             exif = self.get_gps_tags(exif)
 
         return exif
