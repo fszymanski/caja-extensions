@@ -79,20 +79,16 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
         for (k, v) in exif.items():
             store.append([str(k), str(v)])
 
-        column = Gtk.TreeViewColumn.new()
-
-        tag_name = Gtk.CellRendererText.new()
-        column.pack_start(tag_name, True)
-        column.add_attribute(tag_name, "text", 0)
-
-        value = Gtk.CellRendererText.new()
-        column.pack_start(value, True)
-        column.add_attribute(value, "text", 1)
-
         tree_view = Gtk.TreeView.new_with_model(store)
-        tree_view.set_headers_visible(False)
-        tree_view.append_column(column)
         tree_view.show()
+
+        renderer = Gtk.CellRendererText.new()
+        column = Gtk.TreeViewColumn("Tag", renderer, text=0)
+        tree_view.append_column(column)
+
+        renderer = Gtk.CellRendererText.new()
+        column = Gtk.TreeViewColumn("Value", renderer, text=1)
+        tree_view.append_column(column)
 
         scroller = Gtk.ScrolledWindow.new(None, None)
         scroller.add(tree_view)
