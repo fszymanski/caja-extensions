@@ -52,7 +52,7 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
         except Exception:
             pass
 
-        if "GPSInfo" in exif:
+        if "GPSInfo" in exif and isinstance(exif["GPSInfo"], dict):
             exif = self.get_gps_tags(exif)
 
         return exif
