@@ -22,6 +22,7 @@ from PIL.ExifTags import GPSTAGS, TAGS
 import gi
 
 gi.require_version("Caja", "2.0")
+gi.require_version("Gtk", "3.0")
 
 from gi.repository import Caja, GObject, Gtk
 
