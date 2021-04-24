@@ -27,8 +27,8 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
     def __init__(self):
         pass
 
-    def get_metadata(self, filename):
-        res = {}
+    def get_exif(self, filename):
+        exif = {}
 
         metadata = GExiv2.Metadata.new()
         try:
@@ -40,9 +40,9 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
                 for tag in metadata.get_exif_tags():
                     value = metadata.get_tag_interpreted_string(tag)
                     if value is not None:
-                        res[tag.split(".")[-1]] = (f"{value[:65]}..." if len(value) > 64 else value)
+                        exif[tag.split(".")[-1]] = (f"{value[:65]}..." if len(value) > 64 else value)
 
-        return res
+        return exif
 
     def get_property_pages(self, files):
         if len(files) != 1:
@@ -53,15 +53,15 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
             return
 
         filename = file.get_location().get_path()
-        metadata = self.get_metadata(filename)
-        if not metadata:
+        exif = self.get_exif(filename)
+        if not exif:
             return
 
         label = Gtk.Label.new("Exif")
         label.show()
 
         store = Gtk.ListStore.new([str, str])
-        for (k, v) in sorted(metadata.items()):
+        for (k, v) in sorted(exif.items()):
             store.append([k, v])
 
         tree_view = Gtk.TreeView.new_with_model(store)
