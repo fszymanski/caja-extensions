@@ -14,6 +14,15 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 #
 
+try:
+    import gettext
+
+    gettext.bindtextdomain("caja-extensions")
+    gettext.textdomain("caja-extensions")
+    _ = gettext.gettext
+except:
+    _ = lambda s: s
+
 import gi
 
 gi.require_version("Caja", "2.0")
@@ -57,7 +66,7 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
         if not exif:
             return
 
-        label = Gtk.Label.new("Exif")
+        label = Gtk.Label.new(_("Exif"))
         label.show()
 
         store = Gtk.ListStore.new([str, str])
@@ -68,11 +77,11 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
         tree_view.show()
 
         renderer = Gtk.CellRendererText.new()
-        column = Gtk.TreeViewColumn("Tag", renderer, text=0)
+        column = Gtk.TreeViewColumn(_("Tag"), renderer, text=0)
         tree_view.append_column(column)
 
         renderer = Gtk.CellRendererText.new()
-        column = Gtk.TreeViewColumn("Value", renderer, text=1)
+        column = Gtk.TreeViewColumn(_("Value"), renderer, text=1)
         tree_view.append_column(column)
 
         scroller = Gtk.ScrolledWindow.new(None, None)
