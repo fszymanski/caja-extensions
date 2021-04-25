@@ -47,9 +47,11 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
         else:
             if metadata.has_exif():
                 for tag in metadata.get_exif_tags():
-                    value = metadata.get_tag_interpreted_string(tag)
-                    if value is not None:
+                    try:
+                        value = metadata.try_get_tag_interpreted_string(tag)
                         exif[tag.split(".")[-1]] = (f"{value[:65]}..." if len(value) > 64 else value)
+                    except GLib.Error:
+                        pass
 
         return exif
 
