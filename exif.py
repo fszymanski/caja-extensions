@@ -41,11 +41,11 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
 
         metadata = GExiv2.Metadata.new()
         try:
-            ok = metadata.open_path(filename)
+            metadata.open_path(filename)
         except GLib.Error:
             pass
         else:
-            if ok and metadata.has_exif():
+            if metadata.has_exif():
                 for tag in metadata.get_exif_tags():
                     value = metadata.get_tag_interpreted_string(tag)
                     if value is not None:
