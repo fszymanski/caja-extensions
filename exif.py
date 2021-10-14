@@ -17,18 +17,17 @@
 try:
     import gettext
 
-    gettext.bindtextdomain("caja-extensions")
-    gettext.textdomain("caja-extensions")
+    gettext.bindtextdomain('caja-extensions')
+    gettext.textdomain('caja-extensions')
     _ = gettext.gettext
 except:
     _ = lambda s: s
 
 import gi
 
-gi.require_version("Caja", "2.0")
-gi.require_version('GExiv2', "0.10")
-gi.require_version("Gtk", "3.0")
-
+gi.require_version('Caja', '2.0')
+gi.require_version('GExiv2', '0.10')
+gi.require_version('Gtk', '3.0')
 from gi.repository import Caja, GExiv2, GLib, GObject, Gtk
 
 
@@ -49,7 +48,7 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
                 for tag in metadata.get_exif_tags():
                     try:
                         value = metadata.try_get_tag_interpreted_string(tag)
-                        exif[tag.split(".")[-1]] = (f"{value[:65]}..." if len(value) > 64 else value)
+                        exif[tag.split(".")[-1]] = (f'{value[:65]}...' if len(value) > 64 else value)
                     except GLib.Error:
                         pass
 
@@ -60,7 +59,7 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
             return
 
         file = files[0]
-        if (file.get_uri_scheme() != "file") or file.is_directory():
+        if (file.get_uri_scheme() != 'file') or file.is_directory():
             return
 
         filename = file.get_location().get_path()
@@ -68,30 +67,30 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
         if not exif:
             return
 
-        label = Gtk.Label.new(_("Exif"))
+        label = Gtk.Label.new(_('Exif'))
         label.show()
 
         store = Gtk.ListStore.new([str, str])
-        for (k, v) in sorted(exif.items()):
-            store.append([k, v])
+        for (t, v) in sorted(exif.items()):
+            store.append([t, v])
 
         tree_view = Gtk.TreeView.new_with_model(store)
         tree_view.show()
 
         renderer = Gtk.CellRendererText.new()
-        column = Gtk.TreeViewColumn(_("Tag"), renderer, text=0)
+        column = Gtk.TreeViewColumn(_('Tag'), renderer, text=0)
         tree_view.append_column(column)
 
         renderer = Gtk.CellRendererText.new()
-        column = Gtk.TreeViewColumn(_("Value"), renderer, text=1)
+        column = Gtk.TreeViewColumn(_('Value'), renderer, text=1)
         tree_view.append_column(column)
 
         scroller = Gtk.ScrolledWindow.new(None, None)
         scroller.add(tree_view)
         scroller.show()
 
-        return (Caja.PropertyPage(name="CajaPython::exif",
+        return (Caja.PropertyPage(name='CajaPython::exif',
                                   label=label,
                                   page=scroller),)
 
-# vim: ts=4 et
+# vim: ft=python3 ts=4 et
