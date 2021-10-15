@@ -14,14 +14,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 #
 
-try:
-    import gettext
+import gettext
 
-    gettext.bindtextdomain('caja-extensions')
-    gettext.textdomain('caja-extensions')
-    _ = gettext.gettext
-except:
-    _ = lambda s: s
+gettext.textdomain('caja-exif')
+_ = gettext.gettext
 
 import gi
 
