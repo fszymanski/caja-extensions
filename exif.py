@@ -14,11 +14,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 #
 
-import gettext
-
-gettext.textdomain('caja-exif')
-_ = gettext.gettext
-
 import gi
 
 gi.require_version('Caja', '2.0')
@@ -52,33 +47,33 @@ class ExifExtension(GObject.GObject, Caja.PropertyPageProvider):
 
     def get_property_pages(self, files):
         if len(files) != 1:
-            return
+            return None
 
         file = files[0]
         if (file.get_uri_scheme() != 'file') or file.is_directory():
-            return
+            return None
 
         filename = file.get_location().get_path()
         exif = self.get_exif(filename)
         if not exif:
-            return
+            return None
 
-        label = Gtk.Label.new(_('Exif'))
+        label = Gtk.Label.new('Exif')
         label.show()
 
         store = Gtk.ListStore.new([str, str])
-        for (t, v) in sorted(exif.items()):
+        for t, v in sorted(exif.items()):
             store.append([t, v])
 
         tree_view = Gtk.TreeView.new_with_model(store)
         tree_view.show()
 
         renderer = Gtk.CellRendererText.new()
-        column = Gtk.TreeViewColumn(_('Tag'), renderer, text=0)
+        column = Gtk.TreeViewColumn('Tag', renderer, text=0)
         tree_view.append_column(column)
 
         renderer = Gtk.CellRendererText.new()
-        column = Gtk.TreeViewColumn(_('Value'), renderer, text=1)
+        column = Gtk.TreeViewColumn('Value', renderer, text=1)
         tree_view.append_column(column)
 
         scroller = Gtk.ScrolledWindow.new(None, None)
